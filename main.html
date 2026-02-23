@@ -1,0 +1,1820 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TruthCheck - Fact Verification</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #2c1810 0%, #1a0f0a 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 40px 20px;
+            overflow-x: hidden;
+            overflow-y: auto;
+            position: relative;
+        }
+        
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                repeating-linear-gradient(
+                    0deg,
+                    transparent,
+                    transparent 80px,
+                    rgba(139, 90, 43, 0.03) 80px,
+                    rgba(139, 90, 43, 0.03) 81px
+                ),
+                radial-gradient(circle at 20% 50%, rgba(139, 90, 43, 0.08) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(101, 67, 33, 0.08) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: 0;
+        }
+        
+        body::after {
+            content: 'TRUTHCHECK TRUTHCHECK TRUTHCHECK TRUTHCHECK TRUTHCHECK TRUTHCHECK TRUTHCHECK TRUTHCHECK TRUTHCHECK TRUTHCHECK TRUTHCHECK TRUTHCHECK TRUTHCHECK TRUTHCHECK TRUTHCHECK TRUTHCHECK TRUTHCHECK TRUTHCHECK TRUTHCHECK TRUTHCHECK TRUTHCHECK TRUTHCHECK TRUTHCHECK TRUTHCHECK TRUTHCHECK TRUTHCHECK TRUTHCHECK TRUTHCHECK TRUTHCHECK TRUTHCHECK';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 200%;
+            height: 100%;
+            font-size: 80px;
+            font-weight: 900;
+            color: rgba(139, 90, 43, 0.12);
+            letter-spacing: 40px;
+            line-height: 120px;
+            word-spacing: 40px;
+            pointer-events: none;
+            z-index: 0;
+            overflow: hidden;
+            white-space: pre-wrap;
+            animation: scrollText 60s linear infinite;
+        }
+        
+        @keyframes scrollText {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(-50%); }
+        }
+        
+        /* Animated Background */
+        .bg-animation {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            overflow: hidden;
+        }
+        
+        .ripple {
+            position: absolute;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(139, 90, 43, 0.4) 0%, transparent 70%);
+            pointer-events: none;
+            animation: ripple-animation 1.5s ease-out;
+        }
+        
+        @keyframes ripple-animation {
+            from {
+                transform: scale(0);
+                opacity: 1;
+            }
+            to {
+                transform: scale(1);
+                opacity: 0;
+            }
+        }
+        
+        .floating-orb {
+            position: absolute;
+            border-radius: 50%;
+            background: radial-gradient(circle at 30% 30%, rgba(77, 166, 255, 0.12), rgba(77, 166, 255, 0.02));
+            animation: float 8s ease-in-out infinite;
+            pointer-events: none;
+            filter: blur(40px);
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0) translateX(0); }
+            25% { transform: translateY(-20px) translateX(10px); }
+            50% { transform: translateY(-10px) translateX(-10px); }
+            75% { transform: translateY(-30px) translateX(5px); }
+        }
+        
+        .floating-orb {
+            position: absolute;
+            border-radius: 50%;
+            background: radial-gradient(circle at 30% 30%, rgba(139, 90, 43, 0.15), rgba(139, 90, 43, 0.03));
+            animation: float 8s ease-in-out infinite;
+            pointer-events: none;
+            filter: blur(50px);
+        }
+        
+        .bg-line {
+            position: absolute;
+            width: 2px;
+            height: 100%;
+            background: linear-gradient(180deg, 
+                transparent 0%, 
+                rgba(139, 90, 43, 0.3) 50%, 
+                transparent 100%
+            );
+            animation: lineFloat 5s ease-in-out infinite;
+            pointer-events: none;
+        }
+        
+        @keyframes lineFloat {
+            0%, 100% { 
+                transform: translateY(-100%);
+                opacity: 0;
+            }
+            50% { 
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+        
+        .container {
+            max-width: 750px;
+            width: 100%;
+            background: linear-gradient(135deg, #f5e6d3 0%, #e8d4ba 100%);
+            backdrop-filter: blur(20px);
+            border-radius: 24px;
+            box-shadow: 
+                0 24px 48px rgba(0, 0, 0, 0.5),
+                0 0 0 1px rgba(139, 90, 43, 0.2) inset;
+            padding: 48px 44px;
+            position: relative;
+            z-index: 1;
+            animation: slideIn 0.6s ease-out;
+            margin: 20px auto;
+        }
+        
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        
+        .logo {
+            width: 70px;
+            height: 70px;
+            margin: 0 auto 20px;
+            background: linear-gradient(135deg, #8b5a2b 0%, #654321 100%);
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 40px;
+            font-weight: bold;
+            color: white;
+            box-shadow: 0 10px 30px rgba(139, 90, 43, 0.4);
+            animation: logoFloat 3s ease-in-out infinite;
+        }
+        
+        @keyframes logoFloat {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+        
+        h1 {
+            font-size: 2.6em;
+            font-weight: 800;
+            background: linear-gradient(135deg, #8b5a2b 0%, #654321 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 8px;
+            letter-spacing: -0.5px;
+        }
+        
+        .subtitle {
+            color: #6b4423;
+            font-size: 1.05em;
+            font-weight: 400;
+        }
+        
+        .input-section {
+            margin: 30px 0;
+        }
+        
+        .label {
+            color: #5c3d2e;
+            font-weight: 600;
+            margin-bottom: 10px;
+            display: block;
+            font-size: 0.9em;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+        }
+        
+        textarea {
+            width: 100%;
+            min-height: 160px;
+            padding: 18px;
+            border: 2px solid #d4b896;
+            border-radius: 12px;
+            font-family: 'Inter', sans-serif;
+            font-size: 15px;
+            resize: vertical;
+            transition: all 0.3s ease;
+            background: #faf6f0;
+            line-height: 1.6;
+            color: #3d2817;
+        }
+        
+        textarea:focus {
+            outline: none;
+            border-color: #8b5a2b;
+            background: #fff;
+            box-shadow: 0 0 0 4px rgba(139, 90, 43, 0.1);
+        }
+        
+        textarea::placeholder {
+            color: #a08060;
+        }
+        
+        .check-btn {
+            width: 100%;
+            padding: 16px;
+            background: linear-gradient(135deg, #8b5a2b 0%, #654321 100%);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 8px 24px rgba(139, 90, 43, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .check-btn::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.3);
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+        }
+        
+        .check-btn:hover::before {
+            width: 300px;
+            height: 300px;
+        }
+        
+        .check-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 32px rgba(139, 90, 43, 0.4);
+        }
+        
+        .check-btn:active {
+            transform: translateY(-1px);
+        }
+        
+        .check-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .check-btn span {
+            position: relative;
+            z-index: 1;
+        }
+        
+        .loader {
+            display: none;
+            text-align: center;
+            margin: 30px 0;
+        }
+        
+        .loader.show {
+            display: block;
+        }
+        
+        .spinner {
+            width: 50px;
+            height: 50px;
+            margin: 0 auto 15px;
+            border: 4px solid #e8d4ba;
+            border-top: 4px solid #8b5a2b;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .loader-text {
+            color: #8b5a2b;
+            font-weight: 600;
+        }
+        
+        .result {
+            display: none;
+            margin-top: 30px;
+            padding: 30px;
+            border-radius: 20px;
+            animation: resultSlide 0.5s ease-out;
+        }
+        
+        @keyframes resultSlide {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .result.show {
+            display: block;
+        }
+        
+        .result.real {
+            background: linear-gradient(135deg, #f0e6d6 0%, #e5d5c0 100%);
+            border: 2px solid #8b5a2b;
+        }
+        
+        .result.fake {
+            background: linear-gradient(135deg, #f0e6d6 0%, #e5d5c0 100%);
+            border: 2px solid #8b5a2b;
+        }
+        
+        .result.uncertain {
+            background: linear-gradient(135deg, #f0e6d6 0%, #e5d5c0 100%);
+            border: 2px solid #8b5a2b;
+        }
+        
+        .verdict-badge {
+            display: inline-block;
+            padding: 10px 25px;
+            border-radius: 50px;
+            font-weight: 700;
+            font-size: 1.4em;
+            margin-bottom: 20px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .result.real .verdict-badge {
+            background: #8b5a2b;
+            color: white;
+            box-shadow: 0 5px 20px rgba(139, 90, 43, 0.4);
+        }
+        
+        .result.fake .verdict-badge {
+            background: #8b5a2b;
+            color: white;
+            box-shadow: 0 5px 20px rgba(139, 90, 43, 0.4);
+        }
+        
+        .result.uncertain .verdict-badge {
+            background: #8b5a2b;
+            color: white;
+            box-shadow: 0 5px 20px rgba(139, 90, 43, 0.4);
+        }
+        
+        .confidence-bar {
+            margin: 25px 0;
+        }
+        
+        .confidence-label {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            font-weight: 600;
+            color: #333;
+        }
+        
+        .bar-container {
+            height: 12px;
+            background: rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+            overflow: hidden;
+            position: relative;
+        }
+        
+        .bar-fill {
+            height: 100%;
+            border-radius: 10px;
+            transition: width 1s ease-out;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .bar-fill::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            bottom: 0;
+            right: 0;
+            background: linear-gradient(
+                90deg,
+                transparent,
+                rgba(255, 255, 255, 0.3),
+                transparent
+            );
+            animation: shimmer 2s infinite;
+        }
+        
+        @keyframes shimmer {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+        
+        .result.real .bar-fill {
+            background: linear-gradient(90deg, #8b5a2b 0%, #654321 100%);
+        }
+        
+        .result.fake .bar-fill {
+            background: linear-gradient(90deg, #8b5a2b 0%, #654321 100%);
+        }
+        
+        .result.uncertain .bar-fill {
+            background: linear-gradient(90deg, #8b5a2b 0%, #654321 100%);
+        }
+        
+        .findings {
+            margin-top: 25px;
+            padding-top: 25px;
+            border-top: 2px solid rgba(0, 0, 0, 0.1);
+        }
+        
+        .findings-title {
+            font-weight: 700;
+            font-size: 1.1em;
+            margin-bottom: 15px;
+            color: #333;
+        }
+        
+        .findings ul {
+            list-style: none;
+            padding: 0;
+        }
+        
+        .findings li {
+            padding: 12px 15px;
+            margin: 8px 0;
+            background: rgba(255, 255, 255, 0.7);
+            border-radius: 10px;
+            border-left: 4px solid;
+            color: #555;
+            font-size: 0.95em;
+        }
+        
+        .result.real .findings li {
+            border-left-color: #8b5a2b;
+        }
+        
+        .result.fake .findings li {
+            border-left-color: #8b5a2b;
+        }
+        
+        .result.uncertain .findings li {
+            border-left-color: #8b5a2b;
+        }
+        
+        .findings li::before {
+            content: '▸';
+            margin-right: 10px;
+            font-weight: bold;
+            color: #8b5a2b;
+        }
+        
+        .disclaimer {
+            margin-top: 25px;
+            padding: 15px;
+            background: rgba(0, 0, 0, 0.05);
+            border-radius: 10px;
+            font-size: 0.85em;
+            color: #666;
+            text-align: center;
+            border-left: 3px solid #8b5a2b;
+        }
+        
+        .error {
+            display: none;
+            margin: 20px 0;
+            padding: 15px 20px;
+            background: #f8d7da;
+            border: 2px solid #dc3545;
+            border-radius: 10px;
+            color: #721c24;
+            white-space: pre-line;
+        }
+        
+        .error.show {
+            display: block;
+            animation: shake 0.5s;
+        }
+        
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-10px); }
+            75% { transform: translateX(10px); }
+        }
+        
+        /* Side Panel */
+        .side-panel {
+            position: fixed;
+            left: -230px;
+            top: 0;
+            width: 280px;
+            height: 100vh;
+            background: linear-gradient(180deg, #2c1810 0%, #1a0f0a 100%);
+            border-right: 1px solid rgba(139, 90, 43, 0.3);
+            box-shadow: 4px 0 24px rgba(0, 0, 0, 0.6);
+            transition: left 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 1000;
+            overflow-y: auto;
+        }
+        
+        .side-panel:hover {
+            left: 0;
+        }
+        
+        .panel-trigger {
+            position: absolute;
+            right: -50px;
+            top: 0;
+            width: 50px;
+            height: 100vh;
+            background: linear-gradient(90deg, 
+                rgba(139, 90, 43, 0.4) 0%, 
+                rgba(139, 90, 43, 0.2) 50%,
+                transparent 100%
+            );
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: rgba(212, 184, 150, 0.6);
+            font-size: 1.5em;
+            font-weight: 600;
+        }
+        
+        .panel-trigger::before {
+            content: '☰';
+            writing-mode: vertical-rl;
+            letter-spacing: 8px;
+        }
+        
+        .side-panel:hover .panel-trigger {
+            background: linear-gradient(90deg, 
+                rgba(139, 90, 43, 0.6) 0%, 
+                rgba(139, 90, 43, 0.3) 50%,
+                transparent 100%
+            );
+            color: rgba(212, 184, 150, 0.9);
+        }
+        
+        .panel-header {
+            padding: 40px 24px 30px;
+            border-bottom: 1px solid rgba(139, 90, 43, 0.2);
+        }
+        
+        .panel-title {
+            color: #d4b896;
+            font-size: 1.1em;
+            font-weight: 600;
+            margin-bottom: 24px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            opacity: 0.9;
+        }
+        
+        .panel-nav {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        
+        .panel-nav li {
+            padding: 14px 24px;
+            color: #a08060;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border-left: 3px solid transparent;
+            font-weight: 500;
+            font-size: 0.95em;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .panel-nav li:hover {
+            background: rgba(139, 90, 43, 0.15);
+            color: #d4b896;
+            border-left-color: #8b5a2b;
+            padding-left: 28px;
+        }
+        
+        .panel-nav li.active {
+            background: rgba(139, 90, 43, 0.25);
+            color: #d4b896;
+            border-left-color: #8b5a2b;
+            font-weight: 600;
+        }
+        
+        .panel-nav li::before {
+            font-size: 1.2em;
+        }
+        
+        .history-list {
+            padding: 24px;
+        }
+        
+        .history-item {
+            background: rgba(139, 90, 43, 0.1);
+            border: 1px solid rgba(139, 90, 43, 0.2);
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .history-item:hover {
+            background: rgba(139, 90, 43, 0.2);
+            border-color: rgba(139, 90, 43, 0.5);
+            transform: translateX(4px);
+            box-shadow: 0 4px 12px rgba(139, 90, 43, 0.2);
+        }
+        
+        .history-text {
+            color: #d4b896;
+            font-size: 0.88em;
+            margin-bottom: 10px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            line-height: 1.5;
+        }
+        
+        .history-result {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 10px;
+        }
+        
+        .history-label {
+            font-weight: 600;
+            font-size: 0.8em;
+            padding: 5px 12px;
+            border-radius: 6px;
+            background: rgba(139, 90, 43, 0.3);
+            color: #d4b896;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .history-confidence {
+            color: #a08060;
+            font-size: 0.82em;
+            font-weight: 500;
+        }
+        
+        .history-time {
+            color: #7a5c3d;
+            font-size: 0.72em;
+            margin-top: 8px;
+            font-weight: 400;
+        }
+        
+        .no-history {
+            color: #6b7d99;
+            text-align: center;
+            padding: 60px 24px;
+            font-style: italic;
+            font-size: 0.9em;
+        }
+        
+        .clear-history {
+            margin: 20px 24px;
+            padding: 12px;
+            background: rgba(239, 68, 68, 0.08);
+            border: 1px solid rgba(239, 68, 68, 0.2);
+            border-radius: 10px;
+            color: #ef4444;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 500;
+            font-size: 0.88em;
+        }
+        
+        .clear-history:hover {
+            background: rgba(239, 68, 68, 0.15);
+            border-color: rgba(239, 68, 68, 0.4);
+        }
+        
+        /* Hide scrollbar for side panel */
+        .side-panel::-webkit-scrollbar {
+            width: 5px;
+        }
+        
+        .side-panel::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        
+        .side-panel::-webkit-scrollbar-thumb {
+            background: rgba(139, 90, 43, 0.3);
+            border-radius: 5px;
+        }
+        
+        /* About Section */
+        .about-section {
+            padding: 24px;
+        }
+        
+        .about-title {
+            color: #d4b896;
+            font-size: 1.3em;
+            font-weight: 700;
+            margin-bottom: 24px;
+            text-align: center;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+        }
+        
+        .tech-bubble {
+            background: rgba(139, 90, 43, 0.12);
+            border: 1px solid rgba(139, 90, 43, 0.25);
+            border-radius: 16px;
+            padding: 16px;
+            margin-bottom: 14px;
+            display: flex;
+            align-items: flex-start;
+            gap: 14px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .tech-bubble:hover {
+            background: rgba(139, 90, 43, 0.2);
+            border-color: rgba(139, 90, 43, 0.4);
+            transform: translateX(4px);
+        }
+        
+        .tech-bubble.expanded {
+            background: rgba(139, 90, 43, 0.18);
+            border-color: rgba(139, 90, 43, 0.5);
+        }
+        
+        .bubble-icon {
+            font-size: 1.8em;
+            flex-shrink: 0;
+            filter: grayscale(0.3);
+        }
+        
+        .bubble-content {
+            flex: 1;
+        }
+        
+        .bubble-content strong {
+            display: block;
+            color: #d4b896;
+            font-size: 0.95em;
+            font-weight: 700;
+            margin-bottom: 6px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .bubble-content p {
+            color: #a08060;
+            font-size: 0.85em;
+            line-height: 1.5;
+            margin: 0;
+        }
+        
+        .bubble-details {
+            display: none;
+            margin-top: 12px;
+            padding-top: 12px;
+            border-top: 1px solid rgba(139, 90, 43, 0.2);
+            color: #8b7355;
+            font-size: 0.82em;
+            line-height: 1.7;
+        }
+        
+        .bubble-details.show {
+            display: block;
+            animation: slideDown 0.3s ease-out;
+        }
+        
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .bubble-details ul {
+            margin: 8px 0;
+            padding-left: 20px;
+        }
+        
+        .bubble-details li {
+            margin: 4px 0;
+        }
+        
+        .expand-icon {
+            margin-left: auto;
+            color: #8b5a2b;
+            font-size: 0.9em;
+            transition: transform 0.3s ease;
+        }
+        
+        .tech-bubble.expanded .expand-icon {
+            transform: rotate(180deg);
+        }
+        
+        /* Chatbot */
+        .chat-button {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, #8b5a2b 0%, #654321 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            color: white;
+            cursor: pointer;
+            box-shadow: 0 8px 24px rgba(139, 90, 43, 0.4);
+            transition: all 0.3s ease;
+            z-index: 1001;
+        }
+        
+        .chat-button:hover {
+            transform: scale(1.1);
+            box-shadow: 0 12px 32px rgba(139, 90, 43, 0.6);
+        }
+        
+        .chat-window {
+            position: fixed;
+            bottom: 100px;
+            right: 30px;
+            width: 380px;
+            height: 500px;
+            background: linear-gradient(135deg, #f5e6d3 0%, #e8d4ba 100%);
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+            display: none;
+            flex-direction: column;
+            z-index: 1001;
+            animation: slideUp 0.3s ease-out;
+        }
+        
+        .chat-window.show {
+            display: flex;
+        }
+        
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .chat-header {
+            padding: 20px;
+            background: linear-gradient(135deg, #8b5a2b 0%, #654321 100%);
+            border-radius: 20px 20px 0 0;
+            color: white;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .chat-header h3 {
+            font-size: 1.1em;
+            font-weight: 600;
+        }
+        
+        .chat-close {
+            cursor: pointer;
+            font-size: 1.5em;
+            line-height: 1;
+            opacity: 0.8;
+            transition: opacity 0.3s;
+        }
+        
+        .chat-close:hover {
+            opacity: 1;
+        }
+        
+        .chat-messages {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        
+        .chat-message {
+            padding: 12px 16px;
+            border-radius: 12px;
+            max-width: 80%;
+            line-height: 1.5;
+            font-size: 0.9em;
+            animation: messageSlide 0.3s ease-out;
+        }
+        
+        @keyframes messageSlide {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .chat-message.bot {
+            background: rgba(139, 90, 43, 0.15);
+            border: 1px solid rgba(139, 90, 43, 0.3);
+            align-self: flex-start;
+            color: #3d2817;
+        }
+        
+        .chat-message.user {
+            background: linear-gradient(135deg, #8b5a2b 0%, #654321 100%);
+            color: white;
+            align-self: flex-end;
+        }
+        
+        .chat-input-container {
+            padding: 15px;
+            border-top: 1px solid rgba(139, 90, 43, 0.2);
+            display: flex;
+            gap: 10px;
+        }
+        
+        .chat-input {
+            flex: 1;
+            padding: 12px;
+            border: 2px solid #d4b896;
+            border-radius: 10px;
+            font-family: 'Inter', sans-serif;
+            font-size: 0.9em;
+            background: #faf6f0;
+            color: #3d2817;
+        }
+        
+        .chat-input:focus {
+            outline: none;
+            border-color: #8b5a2b;
+        }
+        
+        .chat-send {
+            padding: 12px 20px;
+            background: linear-gradient(135deg, #8b5a2b 0%, #654321 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+        
+        .chat-send:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(139, 90, 43, 0.4);
+        }
+        
+        .chat-messages::-webkit-scrollbar {
+            width: 6px;
+        }
+        
+        .chat-messages::-webkit-scrollbar-track {
+            background: rgba(139, 90, 43, 0.1);
+            border-radius: 10px;
+        }
+        
+        .chat-messages::-webkit-scrollbar-thumb {
+            background: rgba(139, 90, 43, 0.3);
+            border-radius: 10px;
+        }
+        
+        .quick-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 8px;
+        }
+        
+        .quick-action {
+            padding: 6px 12px;
+            background: rgba(139, 90, 43, 0.1);
+            border: 1px solid rgba(139, 90, 43, 0.3);
+            border-radius: 20px;
+            font-size: 0.8em;
+            cursor: pointer;
+            transition: all 0.3s;
+            color: #5c3d2e;
+        }
+        
+        .quick-action:hover {
+            background: rgba(139, 90, 43, 0.2);
+            border-color: rgba(139, 90, 43, 0.5);
+        }
+    </style>
+</head>
+<body>
+    <div class="bg-animation" id="bgAnimation"></div>
+    
+    <!-- Side Panel -->
+    <div class="side-panel" id="sidePanel">
+        <div class="panel-trigger">☰</div>
+        <div class="panel-header">
+            <div class="panel-title">Menu</div>
+            <ul class="panel-nav">
+                <li class="active" onclick="showHome()">Home</li>
+                <li onclick="showHistory()">History</li>
+                <li onclick="showAbout()">About</li>
+            </ul>
+        </div>
+        <div id="historyContent" style="display: none;">
+            <div class="history-list" id="historyList"></div>
+            <div class="clear-history" onclick="clearHistory()">Clear History</div>
+        </div>
+    </div>
+    
+    <div class="container" id="aboutContainer" style="display: none;">
+        <div class="about-section">
+            <h3 class="about-title">About TruthCheck</h3>
+            
+            <div class="tech-bubble" onclick="toggleDetails(this)">
+                <span class="bubble-icon">🎯</span>
+                <div class="bubble-content">
+                    <strong>Mission</strong>
+                    <p>Combat misinformation using AI-powered linguistic analysis</p>
+                    <div class="bubble-details">
+                        TruthCheck was built to address the growing problem of fake news and misinformation spreading through social media and messaging platforms. Our mission is to provide users with an instant, AI-powered tool to analyze suspicious content before sharing it. We focus on linguistic patterns, sentiment analysis, and credibility indicators to help users make informed decisions about the information they consume and share.
+                    </div>
+                </div>
+                <span class="expand-icon">▼</span>
+            </div>
+            
+            <div class="tech-bubble" onclick="toggleDetails(this)">
+                <span class="bubble-icon">💻</span>
+                <div class="bubble-content">
+                    <strong>Frontend</strong>
+                    <p>HTML5, CSS3, Vanilla JavaScript</p>
+                    <div class="bubble-details">
+                        <strong>Technologies:</strong>
+                        <ul>
+                            <li><strong>HTML5:</strong> Semantic markup with modern elements</li>
+                            <li><strong>CSS3:</strong> Custom animations, gradients, flexbox layouts, CSS Grid</li>
+                            <li><strong>JavaScript:</strong> Pure vanilla JS (no frameworks) for maximum performance</li>
+                            <li><strong>LocalStorage API:</strong> Client-side data persistence for search history</li>
+                            <li><strong>Fetch API:</strong> Modern HTTP requests to backend</li>
+                        </ul>
+                        <strong>Features:</strong> Responsive design, animated backgrounds, ripple effects, smooth transitions, interactive side panel navigation
+                    </div>
+                </div>
+                <span class="expand-icon">▼</span>
+            </div>
+            
+            <div class="tech-bubble" onclick="toggleDetails(this)">
+                <span class="bubble-icon">⚙️</span>
+                <div class="bubble-content">
+                    <strong>Backend</strong>
+                    <p>Python 3.11 with Flask framework</p>
+                    <div class="bubble-details">
+                        <strong>Stack:</strong>
+                        <ul>
+                            <li><strong>Python 3.11:</strong> Latest stable Python version with performance improvements</li>
+                            <li><strong>Flask 3.0:</strong> Lightweight WSGI web framework</li>
+                            <li><strong>Flask-CORS:</strong> Cross-Origin Resource Sharing support for frontend-backend communication</li>
+                        </ul>
+                        <strong>Architecture:</strong> RESTful API design with JSON responses, modular function structure, error handling middleware, health check endpoints
+                        <br><br>
+                        <strong>Endpoints:</strong>
+                        <ul>
+                            <li><code>/api/check</code> - POST: Analyze text for misinformation</li>
+                            <li><code>/health</code> - GET: Server health status</li>
+                        </ul>
+                    </div>
+                </div>
+                <span class="expand-icon">▼</span>
+            </div>
+            
+            <div class="tech-bubble" onclick="toggleDetails(this)">
+                <span class="bubble-icon">🧠</span>
+                <div class="bubble-content">
+                    <strong>NLP Engine</strong>
+                    <p>TextBlob for sentiment analysis & linguistic patterns</p>
+                    <div class="bubble-details">
+                        <strong>TextBlob Library:</strong> Built on top of NLTK, provides simple API for common NLP tasks
+                        <br><br>
+                        <strong>Capabilities:</strong>
+                        <ul>
+                            <li><strong>Sentiment Analysis:</strong> Polarity (-1 to +1) and subjectivity (0 to 1) scores</li>
+                            <li><strong>Part-of-Speech Tagging:</strong> Identifies nouns, verbs, adjectives</li>
+                            <li><strong>Tokenization:</strong> Breaks text into words and sentences</li>
+                            <li><strong>Word Frequency:</strong> Analyzes lexical diversity</li>
+                        </ul>
+                        <strong>NLTK Corpora Used:</strong> Brown corpus, Punkt tokenizer, WordNet, Averaged Perceptron Tagger, ConLL2000, Movie Reviews
+                    </div>
+                </div>
+                <span class="expand-icon">▼</span>
+            </div>
+            
+            <div class="tech-bubble" onclick="toggleDetails(this)">
+                <span class="bubble-icon">📊</span>
+                <div class="bubble-content">
+                    <strong>Analysis Features</strong>
+                    <p>Sentiment polarity, subjectivity detection, clickbait patterns, credibility indicators</p>
+                    <div class="bubble-details">
+                        <strong>Manipulation Detection:</strong>
+                        <ul>
+                            <li>Clickbait phrase detection (e.g., "you won't believe", "shocking")</li>
+                            <li>Urgent/fear language patterns</li>
+                            <li>Excessive capitalization analysis</li>
+                            <li>Punctuation abuse detection (!!!, ???)</li>
+                            <li>Emotional manipulation words</li>
+                            <li>Low lexical diversity (repetitive language)</li>
+                        </ul>
+                        <strong>Credibility Signals:</strong>
+                        <ul>
+                            <li>Source citations (e.g., "according to", "study shows")</li>
+                            <li>URL presence for verification</li>
+                            <li>Specific dates and numbers</li>
+                            <li>Statistical data references</li>
+                            <li>Neutral, objective tone</li>
+                            <li>Rich vocabulary and diverse language</li>
+                        </ul>
+                    </div>
+                </div>
+                <span class="expand-icon">▼</span>
+            </div>
+            
+            <div class="tech-bubble" onclick="toggleDetails(this)">
+                <span class="bubble-icon">🔧</span>
+                <div class="bubble-content">
+                    <strong>Key Libraries</strong>
+                    <p>Flask-CORS, NLTK, Python Regex, Math (sigmoid functions)</p>
+                    <div class="bubble-details">
+                        <strong>Python Libraries:</strong>
+                        <ul>
+                            <li><strong>Flask-CORS 4.0:</strong> Handles cross-origin requests between frontend and backend</li>
+                            <li><strong>TextBlob 0.17.1:</strong> NLP processing and sentiment analysis</li>
+                            <li><strong>NLTK 3.9.2:</strong> Natural Language Toolkit for advanced text processing</li>
+                            <li><strong>Python re module:</strong> Regular expressions for pattern matching</li>
+                            <li><strong>Python math module:</strong> Sigmoid function for probability calculations</li>
+                            <li><strong>Python collections:</strong> Counter for frequency analysis</li>
+                        </ul>
+                        <strong>Version Control:</strong> All dependencies managed via requirements.txt
+                    </div>
+                </div>
+                <span class="expand-icon">▼</span>
+            </div>
+            
+            <div class="tech-bubble" onclick="toggleDetails(this)">
+                <span class="bubble-icon">💾</span>
+                <div class="bubble-content">
+                    <strong>Storage</strong>
+                    <p>Browser LocalStorage for search history (last 25 searches)</p>
+                    <div class="bubble-details">
+                        <strong>LocalStorage Implementation:</strong>
+                        <ul>
+                            <li>Stores up to 25 most recent searches</li>
+                            <li>Persists across browser sessions</li>
+                            <li>Stores: text content, analysis result, confidence score, timestamp</li>
+                            <li>FIFO (First In, First Out) queue management</li>
+                            <li>JSON serialization for complex data structures</li>
+                        </ul>
+                        <strong>Privacy:</strong> All data stored locally on user's device, no server-side storage, user can clear history anytime
+                        <br><br>
+                        <strong>Data Structure:</strong> Array of objects with text, label, confidence, reasons, and ISO timestamp
+                    </div>
+                </div>
+                <span class="expand-icon">▼</span>
+            </div>
+            
+            <div class="tech-bubble" onclick="toggleDetails(this)">
+                <span class="bubble-icon">🎨</span>
+                <div class="bubble-content">
+                    <strong>Design</strong>
+                    <p>Custom CSS animations, gradient backgrounds, responsive layout</p>
+                    <div class="bubble-details">
+                        <strong>Design System:</strong>
+                        <ul>
+                            <li><strong>Color Palette:</strong> Brown theme (#8b5a2b, #654321, #2c1810) with cream accents</li>
+                            <li><strong>Typography:</strong> Inter font family (300-800 weights), Righteous for display</li>
+                            <li><strong>Animations:</strong> Floating orbs, flowing lines, ripple effects, smooth transitions</li>
+                            <li><strong>Layout:</strong> Flexbox and CSS Grid for responsive design</li>
+                        </ul>
+                        <strong>Interactive Elements:</strong>
+                        <ul>
+                            <li>Retractable side panel with hover trigger</li>
+                            <li>Animated background with "TRUTHCHECK" text pattern</li>
+                            <li>Mouse-following ripple effects</li>
+                            <li>Smooth page transitions</li>
+                            <li>Progress bars with shimmer effects</li>
+                        </ul>
+                    </div>
+                </div>
+                <span class="expand-icon">▼</span>
+            </div>
+            
+            <div class="tech-bubble" onclick="toggleDetails(this)">
+                <span class="bubble-icon">👥</span>
+                <div class="bubble-content">
+                    <strong>Team Hello</strong>
+                    <p>Sumay • Aarav • Soumil</p>
+                    <div class="bubble-details">
+                        <strong>Team Members:</strong>
+                        <ul>
+                            <li><strong>Sumay:</strong> Full-stack development, UI/UX design, project coordination</li>
+                            <li><strong>Aarav:</strong> Backend architecture, NLP implementation, algorithm design</li>
+                            <li><strong>Soumil:</strong> Frontend development, animations, testing & debugging</li>
+                        </ul>
+                        <strong>Development Timeline:</strong> Built during hackathon with iterative improvements based on testing and feedback
+                        <br><br>
+                        <strong>Collaboration Tools:</strong> Git for version control, real-time pair programming, agile methodology
+                    </div>
+                </div>
+                <span class="expand-icon">▼</span>
+            </div>
+            
+            <div class="tech-bubble" onclick="toggleDetails(this)">
+                <span class="bubble-icon">📈</span>
+                <div class="bubble-content">
+                    <strong>Algorithm</strong>
+                    <p>Multi-factor scoring with sigmoid probability distribution</p>
+                    <div class="bubble-details">
+                        <strong>Scoring System:</strong>
+                        <ul>
+                            <li><strong>Credibility Score:</strong> Positive signals (sources, URLs, data, neutral tone)</li>
+                            <li><strong>Manipulation Score:</strong> Negative signals (clickbait, urgency, bias)</li>
+                            <li><strong>Net Score:</strong> Manipulation - Credibility</li>
+                        </ul>
+                        <strong>Sigmoid Function:</strong>
+                        <br>
+                        <code>probability = 1 / (1 + e^(-score * 0.6))</code>
+                        <br><br>
+                        <strong>Why Sigmoid?</strong> Provides smooth probability curve, prevents extreme 0% or 100% scores, handles outliers gracefully
+                        <br><br>
+                        <strong>Thresholds:</strong>
+                        <ul>
+                            <li>≥62%: Classified as "Fake"</li>
+                            <li>≤38%: Classified as "Real"</li>
+                            <li>38-62%: Classified as "Uncertain"</li>
+                        </ul>
+                        <strong>Confidence Calculation:</strong> For "Real" labels, confidence = (1 - fake_probability) × 100. For "Fake" labels, confidence = fake_probability × 100. Capped at 55-95% range.
+                    </div>
+                </div>
+                <span class="expand-icon">▼</span>
+            </div>
+        </div>
+    </div>
+    
+    <div class="container" id="mainContainer">
+        <div class="header">
+            <div class="logo">✓</div>
+            <h1>TruthCheck</h1>
+            <p class="subtitle">AI-Powered Fact Verification</p>
+        </div>
+        
+        <div class="input-section">
+            <label class="label">Enter Text to Verify</label>
+            <textarea id="textInput" placeholder="Paste news articles, social media posts, or WhatsApp forwards here..."></textarea>
+        </div>
+        
+        <button class="check-btn" id="checkBtn" onclick="checkText()">
+            <span>Analyze Content</span>
+        </button>
+        
+        <div class="loader" id="loader">
+            <div class="spinner"></div>
+            <div class="loader-text">Analyzing content...</div>
+        </div>
+        
+        <div class="error" id="error"></div>
+        
+        <div class="result" id="result">
+            <div class="verdict-badge" id="verdict"></div>
+            
+            <div class="confidence-bar">
+                <div class="confidence-label">
+                    <span>Confidence Score</span>
+                    <span id="confidenceText">0%</span>
+                </div>
+                <div class="bar-container">
+                    <div class="bar-fill" id="barFill" style="width: 0%"></div>
+                </div>
+            </div>
+            
+            <div class="findings">
+                <div class="findings-title">Analysis Details</div>
+                <ul id="findings"></ul>
+            </div>
+            
+            <div class="disclaimer">
+                ⚠ This tool analyzes linguistic patterns and does not guarantee factual accuracy. Always verify with multiple trusted sources.
+                <br><br>
+                <strong>Important:</strong> We cannot verify if events actually happened or if people/places are real. Professional-looking fake news can fool linguistic analysis. Always check official news sources and fact-checking websites.
+            </div>
+        </div>
+    </div>
+    
+    <!-- Chatbot -->
+    <div class="chat-button" id="chatButton" onclick="toggleChat()">💬</div>
+    <div class="chat-window" id="chatWindow">
+        <div class="chat-header">
+            <h3>TruthCheck Assistant</h3>
+            <span class="chat-close" onclick="toggleChat()">×</span>
+        </div>
+        <div class="chat-messages" id="chatMessages">
+            <div class="chat-message bot">
+                Hi! I'm your TruthCheck assistant. Ask me anything about how to use the app, our technology, or tips for spotting fake news!
+                <div class="quick-actions">
+                    <div class="quick-action" onclick="sendQuickMessage('How do I use this?')">How to use?</div>
+                    <div class="quick-action" onclick="sendQuickMessage('What tech do you use?')">Tech stack?</div>
+                    <div class="quick-action" onclick="sendQuickMessage('Tips for spotting fake news')">Fake news tips</div>
+                </div>
+            </div>
+        </div>
+        <div class="chat-input-container">
+            <input type="text" class="chat-input" id="chatInput" placeholder="Ask me anything..." onkeypress="if(event.key==='Enter') sendMessage()">
+            <button class="chat-send" onclick="sendMessage()">Send</button>
+        </div>
+    </div>
+    
+    <script>
+        // Animated Background with Ripple Effect
+        const bgAnimation = document.getElementById('bgAnimation');
+        
+        // Create floating orbs
+        for (let i = 0; i < 12; i++) {
+            const orb = document.createElement('div');
+            orb.className = 'floating-orb';
+            const size = Math.random() * 150 + 100;
+            orb.style.width = size + 'px';
+            orb.style.height = size + 'px';
+            orb.style.left = Math.random() * 100 + '%';
+            orb.style.top = Math.random() * 100 + '%';
+            orb.style.animationDelay = Math.random() * 3 + 's';
+            orb.style.animationDuration = (Math.random() * 6 + 6) + 's';
+            bgAnimation.appendChild(orb);
+        }
+        
+        // Create animated lines
+        for (let i = 0; i < 20; i++) {
+            const line = document.createElement('div');
+            line.className = 'bg-line';
+            line.style.left = Math.random() * 100 + '%';
+            line.style.animationDelay = Math.random() * 5 + 's';
+            line.style.animationDuration = (Math.random() * 3 + 4) + 's';
+            bgAnimation.appendChild(line);
+        }
+        
+        // Ripple effect on mouse move
+        let lastRipple = 0;
+        document.addEventListener('mousemove', (e) => {
+            const now = Date.now();
+            if (now - lastRipple < 150) return;
+            lastRipple = now;
+            
+            const ripple = document.createElement('div');
+            ripple.className = 'ripple';
+            const size = Math.random() * 80 + 80;
+            ripple.style.width = size + 'px';
+            ripple.style.height = size + 'px';
+            ripple.style.left = e.clientX - size / 2 + 'px';
+            ripple.style.top = e.clientY - size / 2 + 'px';
+            bgAnimation.appendChild(ripple);
+            
+            setTimeout(() => ripple.remove(), 1500);
+        });
+        
+        // Main functionality
+        const API_URL = 'http://127.0.0.1:5000/api/check';
+        const MAX_HISTORY = 25;
+        
+        // Load history from localStorage
+        function loadHistory() {
+            const history = localStorage.getItem('truthcheck_history');
+            return history ? JSON.parse(history) : [];
+        }
+        
+        // Save history to localStorage
+        function saveHistory(history) {
+            localStorage.setItem('truthcheck_history', JSON.stringify(history));
+        }
+        
+        // Add to history
+        function addToHistory(text, result) {
+            let history = loadHistory();
+            const entry = {
+                text: text,
+                label: result.label,
+                confidence: result.confidence,
+                reasons: result.reasons,
+                timestamp: new Date().toISOString()
+            };
+            
+            history.unshift(entry); // Add to beginning
+            if (history.length > MAX_HISTORY) {
+                history = history.slice(0, MAX_HISTORY); // Keep only last 25
+            }
+            
+            saveHistory(history);
+        }
+        
+        // Show home view
+        function showHome() {
+            document.getElementById('mainContainer').style.display = 'block';
+            document.getElementById('historyContent').style.display = 'none';
+            document.getElementById('aboutContainer').style.display = 'none';
+            
+            // Update nav active state
+            const navItems = document.querySelectorAll('.panel-nav li');
+            navItems[0].classList.add('active');
+            navItems[1].classList.remove('active');
+            navItems[2].classList.remove('active');
+        }
+        
+        // Show history view
+        function showHistory() {
+            document.getElementById('mainContainer').style.display = 'none';
+            document.getElementById('historyContent').style.display = 'block';
+            document.getElementById('aboutContainer').style.display = 'none';
+            
+            // Update nav active state
+            const navItems = document.querySelectorAll('.panel-nav li');
+            navItems[0].classList.remove('active');
+            navItems[1].classList.add('active');
+            navItems[2].classList.remove('active');
+            
+            renderHistory();
+        }
+        
+        // Show about view
+        function showAbout() {
+            document.getElementById('mainContainer').style.display = 'none';
+            document.getElementById('historyContent').style.display = 'none';
+            document.getElementById('aboutContainer').style.display = 'block';
+            
+            // Update nav active state
+            const navItems = document.querySelectorAll('.panel-nav li');
+            navItems[0].classList.remove('active');
+            navItems[1].classList.remove('active');
+            navItems[2].classList.add('active');
+        }
+        
+        // Render history list
+        function renderHistory() {
+            const history = loadHistory();
+            const historyList = document.getElementById('historyList');
+            
+            if (history.length === 0) {
+                historyList.innerHTML = '<div class="no-history">No search history yet</div>';
+                return;
+            }
+            
+            historyList.innerHTML = history.map((entry, index) => {
+                const date = new Date(entry.timestamp);
+                const timeStr = date.toLocaleString();
+                
+                return `
+                    <div class="history-item" onclick="rerunSearch(${index})">
+                        <div class="history-text">${entry.text}</div>
+                        <div class="history-result">
+                            <span class="history-label">${entry.label}</span>
+                            <span class="history-confidence">${entry.confidence}%</span>
+                        </div>
+                        <div class="history-time">${timeStr}</div>
+                    </div>
+                `;
+            }).join('');
+        }
+        
+        // Rerun search from history
+        function rerunSearch(index) {
+            const history = loadHistory();
+            const entry = history[index];
+            
+            // Switch to home view
+            showHome();
+            
+            // Fill textarea
+            document.getElementById('textInput').value = entry.text;
+            
+            // Display the result
+            displayResult({
+                label: entry.label,
+                confidence: entry.confidence,
+                reasons: entry.reasons
+            });
+            
+            // Scroll to result
+            setTimeout(() => {
+                document.getElementById('result').scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }, 100);
+        }
+        
+        // Clear history
+        function clearHistory() {
+            if (confirm('Are you sure you want to clear all history?')) {
+                localStorage.removeItem('truthcheck_history');
+                renderHistory();
+            }
+        }
+        
+        async function checkText() {
+            const text = document.getElementById('textInput').value.trim();
+            const resultDiv = document.getElementById('result');
+            const errorDiv = document.getElementById('error');
+            const loader = document.getElementById('loader');
+            const checkBtn = document.getElementById('checkBtn');
+            
+            resultDiv.classList.remove('show');
+            errorDiv.classList.remove('show');
+            
+            if (!text) {
+                showError('Please enter some text to analyze.');
+                return;
+            }
+            
+            if (text.length < 10) {
+                showError('Text too short. Please provide at least 10 characters.');
+                return;
+            }
+            
+            loader.classList.add('show');
+            checkBtn.disabled = true;
+            
+            try {
+                const response = await fetch(API_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ text: text })
+                });
+                
+                if (!response.ok) {
+                    const data = await response.json();
+                    throw new Error(data.error || 'Analysis failed');
+                }
+                
+                const data = await response.json();
+                
+                // Add to history
+                addToHistory(text, data);
+                
+                displayResult(data);
+            } catch (error) {
+                if (error.message.includes('fetch')) {
+                    showError('Cannot connect to backend server. Please make sure:\n1. Backend is running (python app.py)\n2. Server is on http://127.0.0.1:5000');
+                } else {
+                    showError(error.message || 'Analysis failed. Please try again.');
+                }
+            } finally {
+                loader.classList.remove('show');
+                checkBtn.disabled = false;
+            }
+        }
+        
+        function displayResult(data) {
+            const resultDiv = document.getElementById('result');
+            const verdict = document.getElementById('verdict');
+            const confidenceText = document.getElementById('confidenceText');
+            const barFill = document.getElementById('barFill');
+            const findings = document.getElementById('findings');
+            
+            const label = data.label.toLowerCase();
+            
+            verdict.textContent = data.label;
+            confidenceText.textContent = data.confidence + '%';
+            
+            resultDiv.className = 'result ' + label;
+            
+            setTimeout(() => {
+                barFill.style.width = data.confidence + '%';
+            }, 100);
+            
+            findings.innerHTML = '';
+            if (data.reasons && data.reasons.length > 0) {
+                data.reasons.forEach(reason => {
+                    const li = document.createElement('li');
+                    li.textContent = reason;
+                    findings.appendChild(li);
+                });
+            } else {
+                const li = document.createElement('li');
+                li.textContent = 'No significant patterns detected.';
+                findings.appendChild(li);
+            }
+            
+            resultDiv.classList.add('show');
+        }
+        
+        function showError(message) {
+            const errorDiv = document.getElementById('error');
+            errorDiv.textContent = '❌ ' + message;
+            errorDiv.classList.add('show');
+        }
+        
+        document.getElementById('textInput').addEventListener('keydown', function(e) {
+            if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+                checkText();
+            }
+        });
+        
+        // Toggle details in about section
+        function toggleDetails(bubble) {
+            const details = bubble.querySelector('.bubble-details');
+            const isExpanded = bubble.classList.contains('expanded');
+            
+            // Close all other bubbles
+            document.querySelectorAll('.tech-bubble').forEach(b => {
+                if (b !== bubble) {
+                    b.classList.remove('expanded');
+                    const d = b.querySelector('.bubble-details');
+                    if (d) d.classList.remove('show');
+                }
+            });
+            
+            // Toggle current bubble
+            if (isExpanded) {
+                bubble.classList.remove('expanded');
+                details.classList.remove('show');
+            } else {
+                bubble.classList.add('expanded');
+                details.classList.add('show');
+            }
+        }
+        
+        // Chatbot functionality
+        function toggleChat() {
+            const chatWindow = document.getElementById('chatWindow');
+            chatWindow.classList.toggle('show');
+        }
+        
+        function sendMessage() {
+            const input = document.getElementById('chatInput');
+            const message = input.value.trim();
+            if (!message) return;
+            
+            addMessage(message, 'user');
+            input.value = '';
+            
+            setTimeout(() => {
+                const response = getBotResponse(message);
+                addMessage(response, 'bot');
+            }, 500);
+        }
+        
+        function sendQuickMessage(message) {
+            addMessage(message, 'user');
+            setTimeout(() => {
+                const response = getBotResponse(message);
+                addMessage(response, 'bot');
+            }, 500);
+        }
+        
+        function addMessage(text, type) {
+            const messagesDiv = document.getElementById('chatMessages');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `chat-message ${type}`;
+            messageDiv.textContent = text;
+            messagesDiv.appendChild(messageDiv);
+            messagesDiv.scrollTop = messagesDiv.scrollHeight;
+        }
+        
+        function getBotResponse(message) {
+            const msg = message.toLowerCase();
+            
+            // How to use
+            if (msg.includes('how') && (msg.includes('use') || msg.includes('work'))) {
+                return "It's simple! Just paste any news article or message into the text box, click 'Analyze Content', and we'll tell you if it looks Real, Fake, or Uncertain with a confidence score. Check the Analysis Details for specific reasons.";
+            }
+            
+            // Tech stack
+            if (msg.includes('tech') || msg.includes('technology') || msg.includes('built')) {
+                return "We're built with Python Flask backend, TextBlob for NLP, and vanilla JavaScript frontend. We use sentiment analysis, pattern matching, and credibility indicators to detect fake news. Check the About page for full details!";
+            }
+            
+            // Fake news tips
+            if (msg.includes('tip') || msg.includes('spot') || msg.includes('identify')) {
+                return "Red flags: ALL CAPS, excessive !!!, urgent language like 'SHARE NOW', clickbait phrases, no sources cited, extreme emotional language. Green flags: specific dates, URLs, data/statistics, neutral tone, credible sources mentioned.";
+            }
+            
+            // Accuracy
+            if (msg.includes('accurate') || msg.includes('trust') || msg.includes('reliable')) {
+                return "Our algorithm analyzes linguistic patterns with 55-95% confidence scores. We're not 100% accurate - always verify important information with multiple trusted sources. We're a tool to help you think critically, not replace your judgment.";
+            }
+            
+            // Labels meaning
+            if (msg.includes('real') || msg.includes('fake') || msg.includes('uncertain') || msg.includes('label')) {
+                return "Real (≤38% fake probability): Likely credible. Fake (≥62%): High risk of misinformation. Uncertain (38-62%): Mixed signals - verify before sharing. The confidence score shows how sure we are.";
+            }
+            
+            // Team
+            if (msg.includes('who') || msg.includes('team') || msg.includes('made')) {
+                return "We're Team Hello: Sumay, Aarav, and Soumil! We built TruthCheck to fight misinformation spreading through social media and messaging apps. Check the About page to learn more about us!";
+            }
+            
+            // Algorithm
+            if (msg.includes('algorithm') || msg.includes('how does') || msg.includes('analyze')) {
+                return "We use multi-factor scoring: credibility signals (sources, URLs, data) vs manipulation signals (clickbait, urgency, bias). The net score goes through a sigmoid function to get a probability. It's all explained in detail on the About page!";
+            }
+            
+            // History
+            if (msg.includes('history') || msg.includes('past') || msg.includes('previous')) {
+                return "Your last 25 searches are saved in your browser's local storage. Open the side panel (left edge) and click History to see them. You can click any past search to re-run it, or clear your history anytime.";
+            }
+            
+            // Example
+            if (msg.includes('example') || msg.includes('demo') || msg.includes('test')) {
+                return "Try this fake news example: 'SHOCKING!!! Scientists don't want you to know this SECRET! Share immediately before they delete it!!!' - Notice the caps, urgency, and no sources? That's a red flag!";
+            }
+            
+            // Clear history
+            if (msg.includes('clear') && msg.includes('history')) {
+                return "To clear your history, open the side panel (hover on left edge), click History, then scroll down and click 'Clear History'. This will delete all your saved searches.";
+            }
+            
+            // About page
+            if (msg.includes('about') || msg.includes('more info')) {
+                return "Open the side panel (left edge of screen) and click 'About' to see detailed information about our tech stack, algorithm, team, and more. Each section is expandable for deep details!";
+            }
+            
+            // Greeting
+            if (msg.includes('hello') || msg.includes('hi') || msg.includes('hey')) {
+                return "Hey there! 👋 How can I help you with TruthCheck today? Ask me about how to use the app, our technology, or tips for identifying fake news!";
+            }
+            
+            // Thanks
+            if (msg.includes('thank') || msg.includes('thanks')) {
+                return "You're welcome! Feel free to ask if you have any other questions. Stay informed and think critically! 🎯";
+            }
+            
+            // Default
+            return "I can help you with: How to use TruthCheck, understanding results, our technology, fake news tips, team info, and more. Try asking 'How do I use this?' or 'What tech do you use?'";
+        }
+    </script>
+</body>
+</html>
